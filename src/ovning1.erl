@@ -20,11 +20,15 @@
 -export([number/1]).
 -export([sum/1]).
 -export([duplicate/1]).
+-export([duplicates/1]).
 -export([unique/1]).
 -export([reverse/1]).
 -export([pack/1]).
 -export([isort/1]).
--export([insert/2]).
+-export([msort/1]).
+-export([qsort/1]).
+-export([binaryCodingWay0/1]).
+-export([binaryCodingWay1/1]).
 
 %% Just returns entered value
 double(N)->
@@ -41,7 +45,7 @@ area({square, A})->
   area({rectangle, A, A});
 area({circle, A})->
   pi*A*A;
-area(Other)->
+area(_)->
   'Error! Invalid object!'.
 
 %% Calculates product only by addition
@@ -87,7 +91,7 @@ number(L)->
     _ -> number(L, 1)
   end.
 
-number([H|T], N)->
+number([_|T], N)->
   case T of
     []->N;
     _-> number(T, N+1)
@@ -103,19 +107,27 @@ sum([H|T], S) when is_integer(H)->
     _->sum(T, H+S)
   end.
 
-%% Returns a list of element that are duplicated in the list L
+%% Return a list where all elements are duplicated
 duplicate(L)->
   duplicate(L, []).
 
-duplicate([], A) -> A;
+duplicate([], A) -> reverse(A);
 duplicate([H|T], A)->
+  duplicate(T, [H|[H|A]]).
+
+%% Returns a list of element that are duplicated in the list L
+duplicates(L)->
+  duplicates(L, []).
+
+duplicates([], A) -> A;
+duplicates([H|T], A)->
   case isAMemberOf(H,T) of
-    true -> duplicate(T, insertUnique(H, A));
-    false -> duplicate(T, A)
+    true -> duplicates(T, insertUnique(H, A));
+    false -> duplicates(T, A)
   end.
 
 %% Checks if list contains element E
-isAMemberOf(E, []) -> false;
+isAMemberOf(_, []) -> false;
 isAMemberOf(E, [H|T]) ->
   if
     (E /= H) -> isAMemberOf(E, T);
@@ -150,20 +162,87 @@ reverse([H|T], A)->
 pack(L) -> pack(L, []).
 
 pack([], A) -> A;
-pack([H|T], A)->
-  0.
+pack(L, A) ->
+  Elements = unique(L),
+  no_done.
 
 %% Insertion sort
 isort(L) ->
   isort(L, []).
 
 isort([], S) -> S;
-isort(L, S) ->
-  0.
+isort([H|T], S) ->
+  isort(T, insert(H, S)).
 
 insert(E, []) -> [E];
 insert(E, [H|T])->
   if
-    (E > H) -> insert(E, T);
+    (E > H) -> [H|insert(E, T)];
     true -> [E|[H|T]]
+  end.
+
+
+%% Merge sort
+msort([])->[];
+msort([H])-> [H];
+msort(L)->
+  {A, B} = msplit(L, [], []),
+  merge(msort(A), msort(B)).
+
+msplit([], A, B)-> {reverse(A), reverse(B)};
+msplit([H|T], A, B)->
+  if
+    (length(A) > (length(T)+length(A))/2) -> msplit(T, A, [H|B]);
+    true -> msplit(T, [H|A], B)
+  end.
+
+merge(A, []) -> A;
+merge([], B) -> B;
+merge([H0|T0], [H1|T1])->
+  if
+    (H0 > H1) -> [H1 | merge([H0|T0], T1)];
+    true -> [H0 | merge(T0, [H1|T1])]
+  end.
+
+
+%% Quick sort
+qsort([]) -> [];
+qsort([H]) -> [H];
+qsort([P|T]) ->
+  {A, B} = qsplit(T, P, [], []),
+  SmallSorted = qsort(A),
+  LargeSorted = qsort(B),
+  SmallSorted ++ [P] ++ LargeSorted.
+
+qsplit([], _, A, B)-> {reverse(A), reverse(B)};
+qsplit([H|T], P, A, B) when H > P ->
+  qsplit(T, P, A, [H|B]);
+qsplit([H|T], P, A, B) when H =< P ->
+  qsplit(T, P, [H|A], B).
+
+
+%% Binary coding - convert integer to binary representation of it in list format
+%% First approach - division and reminder
+binaryCodingWay0(I)->
+  binaryCodingWay0(I, []).
+
+binaryCodingWay0(0, L) -> [0|L];
+binaryCodingWay0(1, L) -> [1|L];
+binaryCodingWay0(I,L)->
+  binaryCodingWay0(I div 2, [I rem 2| L]).
+
+%% Binary coding - convert integer to binary representation of it in list format
+%% Second approach - powers of 2
+binaryCodingWay1(I)->
+  binaryCodingWay1(I, [] , 0).
+
+binaryCodingWay1(I, L, Rem)->
+  not_done_yet.
+
+
+findGreatestPowerOf2(I, E)->
+  Temp = expFirst(2, E),
+  if
+    (I - Temp =< 0) -> E;
+    true -> findGreatestPowerOf2(I, E+1)
   end.
