@@ -27,8 +27,8 @@
 -export([isort/1]).
 -export([msort/1]).
 -export([qsort/1]).
--export([binaryCodingWay0/1]).
--export([binaryCodingWay1/1]).
+-export([binaryCoding/1]).
+-export([findGreatestPowerOf2/2]).
 
 %% Just returns entered value
 double(N)->
@@ -158,13 +158,19 @@ reverse([H|T], A)->
   reverse(T, [H|A]).
 
 %% Returns a list containing lists of equal elements
-%% Input: [a,a,b,c,b,a,c] -> Output: [[a,a,a],[b],[c,c]]
-pack(L) -> pack(L, []).
+%% Input: [a,a,b,c,b,a,c] -> Output: [[a,a,a],[b,b],[c,c]]
+pack([H|[]])->
+  [H];
+pack(L)->
+  [H|T] = msort(L),
+  pack([H], T, []).
 
-pack([], A) -> A;
-pack(L, A) ->
-  Elements = unique(L),
-  no_done.
+pack(SubL, [], A)->
+  reverse([SubL|A]);
+pack([SH|_] = SubL, [H|T], A) when H == SH ->
+  pack([H|SubL], T, A);
+pack(SubL, [H|T], A)->
+  pack([H], T, [SubL|A]).
 
 %% Insertion sort
 isort(L) ->
@@ -223,21 +229,13 @@ qsplit([H|T], P, A, B) when H =< P ->
 
 %% Binary coding - convert integer to binary representation of it in list format
 %% First approach - division and reminder
-binaryCodingWay0(I)->
-  binaryCodingWay0(I, []).
+binaryCoding(I)->
+  binaryCoding(I, []).
 
-binaryCodingWay0(0, L) -> [0|L];
-binaryCodingWay0(1, L) -> [1|L];
-binaryCodingWay0(I,L)->
-  binaryCodingWay0(I div 2, [I rem 2| L]).
-
-%% Binary coding - convert integer to binary representation of it in list format
-%% Second approach - powers of 2
-binaryCodingWay1(I)->
-  binaryCodingWay1(I, [] , 0).
-
-binaryCodingWay1(I, L, Rem)->
-  not_done_yet.
+binaryCoding(0, L) -> [0|L];
+binaryCoding(1, L) -> [1|L];
+binaryCoding(I,L)->
+  binaryCoding(I div 2, [I rem 2| L]).
 
 
 findGreatestPowerOf2(I, E)->
